@@ -1,26 +1,43 @@
-version: "3.0"
+version: '3'
 services:
-  app:
-    container_name: hello-php
+  web:
+    container_name: VuSpace
     build: .
     volumes:
-      - ./src:/var/www/html
+      - ./VuSpace:/var/www/html/VuSpace
+      - ./log:/var/log/apache2/
     ports:
-      - 80:80
-      - 8082:8082
+      - "80:80"
+      - "443:443"
   db:
     image: mysql
+    # build:
+    #   context: ./
+    #   dockerfile: Dockerfile-mysql
     command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
+    restart: always 
     volumes:
-      - my-datavolume:/var/lib/mysql
+      - vuspace-db:/var/lib/mysql
+      - ./sql/:/sql
+      - ./my.cnf:/etc/my.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - 8081:8080
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    links:
+      - db
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - 8080:80
+
+
 volumes:
-  my-datavolume:
-      
+  vuspace-db:
